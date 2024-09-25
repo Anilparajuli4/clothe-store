@@ -2,6 +2,7 @@ const Order = require("../../models/Order");
 
 const getAllOrdersOfAllUsers = async (req, res) => {
   try {
+    
     const orders = await Order.find({});
 
     if (!orders.length) {

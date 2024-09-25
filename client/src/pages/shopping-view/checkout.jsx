@@ -72,7 +72,7 @@ function ShoppingCheckout() {
         notes: currentSelectedAddress?.notes,
       },
       orderStatus: "pending",
-      paymentMethod: "paypal",
+      paymentMethod: "esewa",
       paymentStatus: "pending",
       totalAmount: totalCartAmount,
       orderDate: new Date(),
@@ -82,18 +82,74 @@ function ShoppingCheckout() {
     };
 
     dispatch(createNewOrder(orderData)).then((data) => {
-      console.log(data, "sangam");
+      console.log(data, "anil data");
       if (data?.payload?.success) {
         setIsPaymemntStart(true);
+        console.log(data?.payload?.payment?.signature, data?.payload?.payment?.signed_field_names, 'fields');
+        
+        
+        startEsewaPayment(data?.payload?.orderId, data?.payload?.payment?.signature, data?.payload?.payment?.signed_field_names,    totalCartAmount);
       } else {
         setIsPaymemntStart(false);
       }
     });
   }
 
-  if (approvalURL) {
-    window.location.href = approvalURL;
+  // if (approvalURL) {
+  //   window.location.href = approvalURL;
+  // }
+
+  async function  startEsewaPayment(orderId, signature, signed_field_names,  amount ) {
+    // const form = document.createElement("form");
+    // form.method = "POST";
+    // form.action = "https://rc-epay.esewa.com.np/api/epay/main/v2/form";
+  
+    // form.innerHTML = `
+    //   <input type="hidden" name="amt" value="${amount}" />
+    //   <input type="hidden" name="txAmt" value="0" />
+    //   <input type="hidden" name="psc" value="0" />
+    //   <input type="hidden" name="pdc" value="0" />
+    //   <input type="hidden" name="tAmt" value="${amount}" />
+    //   <input type="hidden" name="pid" value="${orderId}" />
+    //   <input type="hidden" name="scd" value="EPAYTEST" />
+    //   <input type="hidden" name="su" value="http://localhost:5173/shop/payment-success" />
+    //   <input type="hidden" name="fu" value="https://developer.esewa.com.np/failure" />
+    //   <input type="hidden" name="signed_field_names" value="${signed_field_names}" />
+    //   <input type="hidden" name="signature" value="${signature}" />
+    // `;
+  
+    // document.body.appendChild(form);
+    // form.submit();
+
+    const url = "http://localhost:5000/esewa-payment";
+  
+    try {
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          orderId: orderId,
+          signature: signature,
+          signed_field_names: signed_field_names,
+          amount: amount
+        })
+      });
+  
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+  
+      const data = await response.json();
+      console.log("Payment Response:", data);
+      return data;
+    } catch (error) {
+      console.error("Payment Error:", error);
+      throw error;
+    }
   }
+ 
 
   return (
     <div className="flex flex-col">
@@ -108,7 +164,7 @@ function ShoppingCheckout() {
         <div className="flex flex-col gap-4">
           {cartItems && cartItems.items && cartItems.items.length > 0
             ? cartItems.items.map((item) => (
-                <UserCartItemsContent cartItem={item} />
+                <UserCartItemsContent  cartItem={item} />
               ))
             : null}
           <div className="mt-8 space-y-4">
@@ -120,8 +176,8 @@ function ShoppingCheckout() {
           <div className="mt-4 w-full">
             <Button onClick={handleInitiatePaypalPayment} className="w-full">
               {isPaymentStart
-                ? "Processing Paypal Payment..."
-                : "Checkout with Paypal"}
+                ? "Processing Esewa Payment..."
+                : "Checkout with Esewa"}
             </Button>
           </div>
         </div>

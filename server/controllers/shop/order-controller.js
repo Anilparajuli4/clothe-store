@@ -1,7 +1,8 @@
-const paypal = require("../../helpers/paypal");
+
+const { getEsewaPaymentHash, verifyEsewaPayment } = require("../../helpers/esewa");
 const Order = require("../../models/Order");
-const Cart = require("../../models/Cart");
-const Product = require("../../models/Product");
+require('dotenv').config();
+const axios = require("axios");
 
 const createOrder = async (req, res) => {
   try {
@@ -15,134 +16,138 @@ const createOrder = async (req, res) => {
       totalAmount,
       orderDate,
       orderUpdateDate,
-      paymentId,
-      payerId,
       cartId,
     } = req.body;
 
-    const create_payment_json = {
-      intent: "sale",
-      payer: {
-        payment_method: "paypal",
-      },
-      redirect_urls: {
-        return_url: "http://localhost:5173/shop/paypal-return",
-        cancel_url: "http://localhost:5173/shop/paypal-cancel",
-      },
-      transactions: [
-        {
-          item_list: {
-            items: cartItems.map((item) => ({
-              name: item.title,
-              sku: item.productId,
-              price: item.price.toFixed(2),
-              currency: "USD",
-              quantity: item.quantity,
-            })),
-          },
-          amount: {
-            currency: "USD",
-            total: totalAmount.toFixed(2),
-          },
-          description: "description",
-        },
-      ],
+    console.log(process.env.ESEWA_SECRET_KEY) 
+    const data = {
+      // Use the parameters required for eSewa payment initiation
+      amount: totalAmount,
+      productId: cartId,
+      productName: "Purchase of items from your shop",
+      returnUrl: "http://localhost:5173/shop/esewa-return",
+      websiteUrl: "http://localhost:5173",
     };
 
-    paypal.payment.create(create_payment_json, async (error, paymentInfo) => {
-      if (error) {
-        console.log(error);
 
-        return res.status(500).json({
-          success: false,
-          message: "Error while creating paypal payment",
-        });
-      } else {
-        const newlyCreatedOrder = new Order({
-          userId,
-          cartId,
-          cartItems,
-          addressInfo,
-          orderStatus,
-          paymentMethod,
-          paymentStatus,
-          totalAmount,
-          orderDate,
-          orderUpdateDate,
-          paymentId,
-          payerId,
-        });
+  // const config = {
+  //   headers: {
+  //     Authorization: `Key 8gBm/:&EnhH.1/q`,
+  //   },
+  // }
 
-        await newlyCreatedOrder.save();
+    
 
-        const approvalURL = paymentInfo.links.find(
-          (link) => link.rel === "approval_url"
-        ).href;
+  //   const esewaResponse = await axios.post(
+  //     "https://esewa.com.np/api/v1/payment/initiate/",
+  //     data,
+  //     config
+  //   );
 
-        res.status(201).json({
-          success: true,
-          approvalURL,
-          orderId: newlyCreatedOrder._id,
-        });
-      }
+    const paymentInitiate = await getEsewaPaymentHash({
+     data
+    });
+
+    console.log("Khalti Response Data:", paymentInitiate);
+
+    // Save order in the database
+    const newlyCreatedOrder = new Order({
+      userId,
+      cartId,
+      cartItems,
+      addressInfo,
+      orderStatus,
+      paymentMethod,
+      paymentStatus,
+      totalAmount,
+      orderDate,
+      orderUpdateDate,
+    });
+
+    await newlyCreatedOrder.save();
+
+    res.status(201).json({
+      success: true,
+      // paymentToken: khaltiResponse.data.token, // Assuming token is in the response
+      payment: paymentInitiate,
+      orderId: newlyCreatedOrder._id,
     });
   } catch (e) {
-    console.log(e);
+    if (e.response) {
+      console.log("Error Data:", e.response.data);
+      console.log("Error Status:", e.response.status);
+      console.log("Error Headers:", e.response.headers);
+    } else {
+      console.log("Error:", e.message);
+    }
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Error during Khalti payment!" + e.message,
     });
   }
-};
+}
 
 const capturePayment = async (req, res) => {
   try {
-    const { paymentId, payerId, orderId } = req.body;
+    const { paymentToken, orderId } = req.body;
 
+    // Find the order in the database
     let order = await Order.findById(orderId);
 
     if (!order) {
       return res.status(404).json({
         success: false,
-        message: "Order can not be found",
+        message: "Order not found",
       });
     }
 
-    order.paymentStatus = "paid";
-    order.orderStatus = "confirmed";
-    order.paymentId = paymentId;
-    order.payerId = payerId;
+    // Verify payment with eSewa
+    const paymentInfo = await verifyEsewaPayment(paymentToken);
 
-    for (let item of order.cartItems) {
-      let product = await Product.findById(item.productId);
+    // Check if payment is successful
+    if (paymentInfo.response.status === "COMPLETE") {
+      order.paymentStatus = "paid";
+      order.orderStatus = "confirmed";
 
-      if (!product) {
-        return res.status(404).json({
-          success: false,
-          message: `Not enough stock for this product ${product.title}`,
-        });
+      // Update stock for each item in the cart
+      for (let item of order.cartItems) {
+        let product = await Product.findById(item.productId);
+
+        if (!product) {
+          return res.status(404).json({
+            success: false,
+            message: `Product ${item.title} not found!`,
+          });
+        }
+
+        product.totalStock -= item.quantity;
+        await product.save();
       }
 
-      product.totalStock -= item.quantity;
+      // Delete the cart after order completion
+      await Cart.findByIdAndDelete(order.cartId);
 
-      await product.save();
+      // Save the updated order
+      await order.save();
+
+      // Return success response
+      res.status(200).json({
+        success: true,
+        message: "Order confirmed",
+        data: order,
+      });
+    } else {
+      res.status(400).json({
+        success: false,
+        message: "Payment could not be verified!",
+      });
     }
-
-    const getCartId = order.cartId;
-    await Cart.findByIdAndDelete(getCartId);
-
-    await order.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Order confirmed",
-      data: order,
-    });
-  } catch (e) {
-    console.log(e);
+  } catch (error) {
+    console.log(error);
     res.status(500).json({
       success: false,
-      message: "Some error occured!",
+      message: "Error while capturing payment",
+      error: error.message,
     });
   }
 };

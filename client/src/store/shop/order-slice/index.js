@@ -7,6 +7,8 @@ const initialState = {
   orderId: null,
   orderList: [],
   orderDetails: null,
+  signature: null,
+  signed_field_names: null,
 };
 
 export const createNewOrder = createAsyncThunk(
@@ -76,6 +78,8 @@ const shoppingOrderSlice = createSlice({
         state.isLoading = false;
         state.approvalURL = action.payload.approvalURL;
         state.orderId = action.payload.orderId;
+        state.signature = action.payload.signature;
+        state.signed_field_names = action.payload.signed_field_names;
         sessionStorage.setItem(
           "currentOrderId",
           JSON.stringify(action.payload.orderId)

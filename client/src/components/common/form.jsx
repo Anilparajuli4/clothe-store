@@ -50,7 +50,7 @@ function CommonForm({
                 [getControlItem.name]: value,
               })
             }
-            value={value}
+            value={value} 
           >
             <SelectTrigger className="w-full">
               <SelectValue placeholder={getControlItem.label} />
