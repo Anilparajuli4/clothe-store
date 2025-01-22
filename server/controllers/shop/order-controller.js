@@ -19,7 +19,7 @@ const createOrder = async (req, res) => {
       cartId,
     } = req.body;
 
-    console.log(process.env.ESEWA_SECRET_KEY) 
+
     const data = {
       // Use the parameters required for eSewa payment initiation
       amount: totalAmount,
@@ -48,7 +48,7 @@ const createOrder = async (req, res) => {
      data
     });
 
-    console.log("Khalti Response Data:", paymentInitiate);
+   
 
     // Save order in the database
     const newlyCreatedOrder = new Order({
@@ -196,7 +196,7 @@ const getOrderDetails = async (req, res) => {
       data: order,
     });
   } catch (e) {
-    console.log(e);
+  
     res.status(500).json({
       success: false,
       message: "Some error occured!",

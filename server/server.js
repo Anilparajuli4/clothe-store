@@ -107,7 +107,7 @@ app.post('/khalti-api/', async (req, res) => {
         Authorization: `key c751831329d544e18671b93070216342`
       }
     });
-    console.log(khaltiResponse.data);  // Log the Khalti response data
+    // Log the Khalti response data
 
     res.status(200).json({
       success: true,
