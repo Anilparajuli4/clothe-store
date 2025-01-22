@@ -15,6 +15,7 @@ const shopSearchRouter = require("./routes/shop/search-routes");
 const shopReviewRouter = require("./routes/shop/review-routes");
 
 const commonFeatureRouter = require("./routes/common/feature-routes");
+const  axios  = require("axios");
 
 
 
@@ -29,6 +30,10 @@ mongoose
 
 const app = express();
 const PORT =  5000;
+
+
+
+
 
 app.use(
   cors({
@@ -60,38 +65,93 @@ app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
 
-app.post('/esewa-payment', async (req, res) => {
-  try {
-    const paymentData = {
-      amt: req.body.amount,
-      txAmt: 0,
-      psc: 0,
-      pdc: 0,
-      tAmt: req.body.amount,
-      pid: req.body.orderId,
-      scd: "EPAYTEST",
-      su: "http://localhost:5173/shop/payment-success",
-      fu: "https://developer.esewa.com.np/failure",
-      signed_field_names: req.body.signed_field_names,
-      signature: req.body.signature,
-    };
+// app.post('/esewa-payment', async (req, res) => {
+//   try {
+//     const paymentData = {
+//       amt: req.body.amount,
+//       txAmt: 0,
+//       psc: 0,
+//       pdc: 0,
+//       tAmt: req.body.amount,
+//       pid: req.body.orderId,
+//       scd: "EPAYTEST",
+//       su: "http://localhost:5173/shop/payment-success",
+//       fu: "https://developer.esewa.com.np/failure",
+//       signed_field_names: req.body.signed_field_names,
+//       signature: req.body.signature,
+//     };
   
-    const response = await fetch('https://rc-epay.esewa.com.np/api/epay/main/v2/form', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams(paymentData),
-    });
+//     const response = await fetch('https://rc-epay.esewa.com.np/api/epay/main/v2/form', {
+//       method: 'POST',
+//       headers: {
+//         'Content-Type': 'application/x-www-form-urlencoded',
+//       },
+//       body: new URLSearchParams(paymentData),
+//     });
   
-    const data = await response.json();
-    console.log(data)
-    res.status(200).json(data);  // Forward the eSewa response to the frontend
-  } catch (error) {
-    console.log(error);
+//     const data = await response.json();
+//     console.log(data)
+//     res.status(200).json(data);  // Forward the eSewa response to the frontend
+//   } catch (error) {
+//     console.log(error);
     
-  }
+//   }
   
+// });
+
+app.post('/khalti-api/', async (req, res) => {
+  try {
+    const payload = req.body;
+    const khaltiResponse = await axios.post('https://a.khalti.com/api/v2/epayment/initiate/', payload, {
+      headers: {
+        Authorization: `key c751831329d544e18671b93070216342`
+      }
+    });
+    console.log(khaltiResponse.data);  // Log the Khalti response data
+
+    res.status(200).json({
+      success: true,
+      data: khaltiResponse.data
+    });
+  } catch (error) {
+    console.error("Error during Khalti payment initiation:", error.message);  // Log any error that occurs
+    res.status(500).json({
+      success: false,
+      message: "Payment initiation failed. Please try again."
+    });
+  }
+});
+
+
+app.get('/payment-success', async (req, res) => {
+  const { pidx, status, transaction_id } = req.query;
+
+  // Always perform a lookup after the payment to verify
+  try {
+    const response = await axios.post(
+      'https://a.khalti.com/api/v2/epayment/lookup/',
+      { pidx },
+      {
+        headers: {
+          Authorization: `Key c751831329d544e18671b93070216342`,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
+
+    // Process based on the lookup result
+    const paymentStatus = response.data.status;
+    if (paymentStatus === 'Completed') {
+      // Payment successful
+      res.redirect('/order-success');  // Redirect to a success page
+    } else {
+      // Payment not completed (pending, failed, etc.)
+      res.redirect('/order-failed');   // Handle accordingly
+    }
+  } catch (error) {
+    console.error('Error in payment verification:', error);
+    res.status(500).json({ error: 'Payment verification failed.' });
+  }
 });
 
 
