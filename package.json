@@ -2,13 +2,14 @@
   "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "server.js",
+  "main": "./server/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "server.js",
-    "dev": "nodemon server.js"
+   "start":"nodemon ./server/server.js",
+ 
+    "dev": "nodemon C:/Users/anil/Desktop/c-commerce/mern-ecommerce-2024/server/server.js",
+    "build": "npm install && npm install --prefix client && npm run build --prefix client"
   },
-  "author": "sangam mukherjee",
+  "author": "Anil parajuli",  
   "license": "ISC",
   "dependencies": {
     "axios": "^1.7.7",

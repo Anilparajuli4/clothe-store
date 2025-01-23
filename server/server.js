@@ -13,15 +13,13 @@ const shopAddressRouter = require("./routes/shop/address-routes");
 const shopOrderRouter = require("./routes/shop/order-routes");
 const shopSearchRouter = require("./routes/shop/search-routes");
 const shopReviewRouter = require("./routes/shop/review-routes");
-
+const path = require("path")
 const commonFeatureRouter = require("./routes/common/feature-routes");
 const  axios  = require("axios");
 
 
 
 
-//create a database connection -> u can also
-//create a separate file for this and then import/use that file here
 
 mongoose
   .connect('mongodb+srv://anilparajuli580:kinganil@cluster0.opnsgkx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
@@ -32,7 +30,7 @@ const app = express();
 const PORT =  5000;
 
 
-
+const _dirname = path.resolve()
 
 
 app.use(
@@ -65,39 +63,7 @@ app.use("/api/shop/review", shopReviewRouter);
 
 app.use("/api/common/feature", commonFeatureRouter);
 
-// app.post('/esewa-payment', async (req, res) => {
-//   try {
-//     const paymentData = {
-//       amt: req.body.amount,
-//       txAmt: 0,
-//       psc: 0,
-//       pdc: 0,
-//       tAmt: req.body.amount,
-//       pid: req.body.orderId,
-//       scd: "EPAYTEST",
-//       su: "http://localhost:5173/shop/payment-success",
-//       fu: "https://developer.esewa.com.np/failure",
-//       signed_field_names: req.body.signed_field_names,
-//       signature: req.body.signature,
-//     };
-  
-//     const response = await fetch('https://rc-epay.esewa.com.np/api/epay/main/v2/form', {
-//       method: 'POST',
-//       headers: {
-//         'Content-Type': 'application/x-www-form-urlencoded',
-//       },
-//       body: new URLSearchParams(paymentData),
-//     });
-  
-//     const data = await response.json();
-//     console.log(data)
-//     res.status(200).json(data);  // Forward the eSewa response to the frontend
-//   } catch (error) {
-//     console.log(error);
-    
-//   }
-  
-// });
+
 
 app.post('/khalti-api/', async (req, res) => {
   try {
@@ -154,5 +120,10 @@ app.get('/payment-success', async (req, res) => {
   }
 });
 
+ 
+app.use(express.static(path.join(_dirname, "/client/dist")))
+app.get('*', (req, res)=> {
+  res.sendFile(path.resolve(_dirname, "client", "dist", "index.html"))
+})
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
