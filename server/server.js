@@ -22,12 +22,12 @@ const  axios  = require("axios");
 
 
 mongoose
-  .connect('mongodb+srv://anilparajuli580:kinganil@cluster0.opnsgkx.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+  .connect(process.env.MONGO)
   .then(() => console.log("MongoDB connected"))
   .catch((error) => console.log(error));
 
-const app = express();
-const PORT =  5000;
+const app = express(); 
+const PORT =  process.env.PORT;
 
 
 const _dirname = path.resolve()
