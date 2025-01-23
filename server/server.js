@@ -35,7 +35,7 @@ const _dirname = path.resolve()
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://clothe-store.onrender.com",
     methods: ["GET", "POST", "DELETE", "PUT"],
     allowedHeaders: [
       "Content-Type",
@@ -127,3 +127,4 @@ app.get('*', (req, res)=> {
 })
 
 app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+ 
