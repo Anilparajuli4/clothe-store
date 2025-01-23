@@ -108,8 +108,8 @@ function ShoppingCheckout() {
 
   async function startKhaltiPayment(orderId, phone, amounts){
     const payload = {
-      return_url: 'http://localhost:5173/shop/payment-success',
-      website_url:  'http://localhost:5173/',
+      return_url: 'https://clothe-store.onrender.com/shop/payment-success',
+      website_url:  'https://clothe-store.onrender.com',
       amount: parseInt(amounts) * 100,
       purchase_order_id: orderId,
       purchase_order_name: "test",
@@ -120,7 +120,7 @@ function ShoppingCheckout() {
       },
     };
 
-    const response = await axios.post(`http://localhost:5000/khalti-api`, payload);
+    const response = await axios.post(`https://clothe-store.onrender.com/khalti-api`, payload);
     console.log(response);
     
     if (response) {

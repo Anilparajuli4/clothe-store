@@ -36,7 +36,7 @@ const PaymentSuccessPage = () => {
     const verifyPayment = async () => {
       try {
         const response = await fetch(
-          `http://localhost:5000/payment-success?pidx=${pidx}` // Assuming this is your backend URL
+          `https://clothe-store.onrender.com/payment-success?pidx=${pidx}` // Assuming this is your backend URL
         );
         const data = await response.json();
 

@@ -25,8 +25,8 @@ const createOrder = async (req, res) => {
       amount: totalAmount,
       productId: cartId,
       productName: "Purchase of items from your shop",
-      returnUrl: "http://localhost:5173/shop/esewa-return",
-      websiteUrl: "http://localhost:5173",
+      returnUrl: "https://clothe-store.onrender.com/shop/esewa-return",
+      websiteUrl: "https://clothe-store.onrender.com",
     };
 
 
