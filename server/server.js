@@ -21,10 +21,25 @@ const  axios  = require("axios");
 
 
 
-mongoose
-  .connect(process.env.MONGO)
-  .then(() => console.log("MongoDB connected"))
-  .catch((error) => console.log(error));
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGO, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+      serverSelectionTimeoutMS: 15000,  // Wait 15 seconds before timing out
+      socketTimeoutMS: 45000,           // Close socket after 45 seconds of inactivity
+    });
+    console.log("MongoDB connected successfully!");
+  } catch (err) {
+    console.error("MongoDB connection error:", err);
+    process.exit(1);  // Terminate the application if DB connection fails
+  }
+};
+
+mongoose.connection.on('disconnected', () => {
+  console.log('MongoDB disconnected. Reconnecting...');
+  connectDB();
+});
 
 const app = express(); 
 const PORT =  process.env.PORT;
@@ -126,5 +141,6 @@ app.get('*', (req, res)=> {
   res.sendFile(path.resolve(_dirname, "client", "dist", "index.html"))
 })
 
-app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`));
+app.listen(PORT, () => console.log(`Server is now running on port ${PORT}`),
+connectDB());
  
