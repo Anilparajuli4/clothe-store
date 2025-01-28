@@ -137,6 +137,7 @@ function ShoppingHome() {
         <Button
           variant="outline"
           size="icon"
+          cl
           onClick={() =>
             setCurrentSlide(
               (prevSlide) =>
@@ -144,9 +145,9 @@ function ShoppingHome() {
                 featureImageList.length
             )
           }
-          className="absolute top-1/2 left-4 transform -translate-y-1/2 bg-white/80"
+          className="absolute md:h-10 md:w-10 h-5 w-4 top-1/2 left-4 transform -translate-y-1/2 bg-white/80"
         >
-          <ChevronLeftIcon className="w-4 h-4" />
+          <ChevronLeftIcon className="md:w-4 w-2 h-2 md:h-4" />
         </Button>
         <Button
           variant="outline"
@@ -156,9 +157,9 @@ function ShoppingHome() {
               (prevSlide) => (prevSlide + 1) % featureImageList.length
             )
           }
-          className="absolute top-1/2 right-4 transform -translate-y-1/2 bg-white/80"
+          className="absolute md:h-10 md:w-10 h-5 w-4  top-1/2 right-4 transform -translate-y-1/2 bg-white/80"
         >
-          <ChevronRightIcon className="w-4 h-4" />
+          <ChevronRightIcon className="md:w-4 w-2 h-2 md:h-4" />
         </Button>
       </div>
       <section className="py-12 bg-gray-50">

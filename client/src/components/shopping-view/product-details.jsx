@@ -106,7 +106,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
 
   return (
     <Dialog open={open} onOpenChange={handleDialogClose}>
-      <DialogContent className="grid grid-cols-2 gap-5 md:gap-8 h-[550px]   md:h-[700px]  sm:p-12 max-w-[95vw] sm:max-w-[80vw] lg:max-w-[70vw]">
+      <DialogContent className="grid grid-cols-2 gap-4 md:gap-8 h-[550px]   md:h-[700px]  sm:p-12 max-w-[95vw] sm:max-w-[80vw] lg:max-w-[70vw]">
         <div className="relative overflow-hidden rounded-lg">
           <img
             src={productDetails?.image}
@@ -118,21 +118,21 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
         </div>
         <div className="">
           <div>
-            <h1 className="md:text-3xl  font-extrabold">{productDetails?.title}</h1>
-            <p className="text-muted-foreground text-[12px] mb-5 mt-4">
+            <h1 className="md:text-3xl text-[14px]  font-extrabold">{productDetails?.title}</h1>
+            <p className="text-muted-foreground text-[10px] mb-5 mt-4">
               {productDetails?.description}
             </p>
           </div>
           <div className="flex items-center justify-between">
             <p
-              className={`md:text-3xl  font-bold text-primary ${
+              className={`md:text-3xl text-[14px] font-bold text-primary ${
                 productDetails?.salePrice > 0 ? "line-through" : ""
               }`}
             >
               ${productDetails?.price}
             </p>
             {productDetails?.salePrice > 0 ? (
-              <p className="md:text-2xl text-[14px]  font-bold text-muted-foreground">
+              <p className="md:text-2xl text-[12px]  font-bold text-muted-foreground">
                 ${productDetails?.salePrice}
               </p>
             ) : null}
@@ -166,7 +166,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
           </div>
           <Separator />
           <div className="max-h-[300px] overflow-auto">
-            <h2 className="md:text-xl text-[14px] font-bold mb-4">Reviews</h2>
+            <h2 className="md:text-xl text-[12px] font-bold mb-4">Reviews</h2>
             <div className="grid gap-6">
               {reviews && reviews.length > 0 ? (
                 reviews.map((reviewItem) => (
@@ -190,7 +190,7 @@ function ProductDetailsDialog({ open, setOpen, productDetails }) {
                   </div>
                 ))
               ) : (
-                <h1 className="md:text-[16px] text-[12px]">No Reviews</h1>
+                <h1 className="md:text-[16px] text-[10px]">No Reviews</h1>
               )}
             </div>
             <div className="md:mt-10 mt-5 flex-col flex gap-2">
