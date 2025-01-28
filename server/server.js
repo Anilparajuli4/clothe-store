@@ -23,9 +23,7 @@ const  axios  = require("axios");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
+    await mongoose.connect(process.env.MONGO, { 
       serverSelectionTimeoutMS: 15000,  // Wait 15 seconds before timing out
       socketTimeoutMS: 45000,           // Close socket after 45 seconds of inactivity
     });
